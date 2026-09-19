@@ -1,33 +1,48 @@
-# tools/find_ottobock_paths.py
+# find_ottobock_paths.py
 
 Ranks a LinkedIn **Connections.csv** export by how useful each contact is as a
-path into Ottobock (prosthetics / orthotics / SUITX exoskeletons).
+warm path into **Ottobock** for Noah — neurobiology major, pulled toward
+engineering, who'd prefer **Emeryville** (SUITX by Ottobock) and then
+**Salt Lake City** (Ottobock's North American engineering and manufacturing).
 
-## 1. Export your connections from LinkedIn
+## 1. Export connections from LinkedIn
 
-LinkedIn (web) → **Me** → **Settings & Privacy** → **Data privacy** →
-**Get a copy of your data** → tick **Connections** → **Request archive**.
-LinkedIn emails a download link within about 10 minutes. Unzip it; the file
-you want is `Connections.csv`.
+Me → Settings & Privacy → Data privacy → **Get a copy of your data** →
+tick **Connections** → Request archive. LinkedIn emails a link in ~10 minutes.
 
 ## 2. Run
 
 ```bash
-python3 tools/find_ottobock_paths.py ~/Downloads/Connections.csv --csv ranked.csv --top 60
+# the .zip works directly -- no need to unzip
+python3 tools/find_ottobock_paths.py ~/Downloads/Basic_LinkedInDataExport.zip \
+    --csv ranked.csv --top 60
 ```
 
-No dependencies beyond Python 3.
+Python 3, no dependencies.
 
-## 3. Read the output
+## 3. How scoring works
 
-Each match gets a tier (1 = strongest):
+Points accumulate across four independent axes, so a Bay Area neuroscientist at
+a medical-device company outranks a distant Ottobock-adjacent name.
 
-| Tier | Meaning |
-|------|---------|
-| 1 | Works at Ottobock, SUITX by Ottobock, or Ottobock.care |
-| 2 | Prosthetics / orthotics / exoskeleton industry (Össur, Hanger, Fillauer, Ekso, …) |
-| 3 | Medical device / med-tech / rehab (Medtronic, Stryker, "medical device", FDA, ISO 13485, …) |
-| 4 | Lives or works in an Ottobock hub (Austin TX, Salt Lake City UT, Louisville KY, Emeryville/Berkeley CA, Duderstadt, Vienna) or is tied to UC Davis |
-| 5 | Sensor / MCU / motor / battery suppliers that sell into bionics, or recruiters and university career staff |
+| Axis | Max | What earns points |
+|------|-----|-------------------|
+| **RELEVANCE** | 100 | Ottobock or SUITX (100) › prosthetics/orthotics/exoskeleton (70) › medical device & rehab (45) › robotics & wearables (25) › embedded/sensor suppliers (12) |
+| **NEURO** | 35 | Neural interfaces, myoelectric/EMG, neuroprosthetics (35) › neuroscience, biomechanics, motor control (22) |
+| **LOCATION** | 30 | Bay Area / Emeryville / Berkeley (30) › Salt Lake City & Utah (20) › UC Davis (10) › Austin (8) › Duderstadt, Vienna, Louisville (6) |
+| **ACCESS** | 20 | Recruiters and talent (20) › hiring decision-makers, VP/Director/founder (15) › professors, PIs, career staff (15) |
 
-Edit the `TIERS` list at the top of the script to add companies or keywords.
+**The NEURO axis is the point.** Ottobock's microprocessor knees and myoelectric
+arms are applied neuro-engineering, so Noah's major is an asset rather than a
+detour. Contacts scoring on both NEURO and RELEVANCE are the best introductions.
+
+### Caveat on location
+
+LinkedIn's export has **no location column**. Location is inferred from company
+and title text plus a list of known-HQ employers, so it is best-effort and will
+miss people whose city isn't implied by where they work.
+
+## 4. Tuning
+
+Edit the `RELEVANCE`, `NEURO`, `LOCATION`, and `ACCESS` tables at the top of the
+script to add employers or adjust weights.
